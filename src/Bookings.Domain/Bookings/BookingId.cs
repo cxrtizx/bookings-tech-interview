@@ -14,7 +14,7 @@ namespace Bookings.Domain.Bookings
         {
             if (value == Guid.Empty)
             {
-                throw new DomainException(BookingErrors.InvalidId);
+                throw new DomainException(BookingErrors.InvalidBookingId);
             }
 
             return new BookingId(value);

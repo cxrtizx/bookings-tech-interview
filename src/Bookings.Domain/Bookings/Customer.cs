@@ -16,9 +16,9 @@ namespace Bookings.Domain.Bookings
             Email = email;
         }
 
-        public static Customer Create(string name, string email)
+        public static Customer Create(string name, string emailAddress)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
                 throw new DomainException(BookingErrors.CustomerNameRequired);
             }
@@ -30,9 +30,9 @@ namespace Bookings.Domain.Bookings
                 throw new DomainException(BookingErrors.CustomerNameTooLong);
             }
 
-            var emailAddress = Email.Create(email);
+            var email = Email.Create(emailAddress);
 
-            return new Customer(name, emailAddress);
+            return new Customer(name, email);
         }
     }
 }
