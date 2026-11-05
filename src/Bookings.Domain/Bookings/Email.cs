@@ -8,6 +8,8 @@ namespace Bookings.Domain.Bookings
         [GeneratedRegex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")]
         private static partial Regex Pattern();
 
+        public const int MaxLength = 100;
+
         public string Value { get; }
 
         private Email(string emailAddress)
@@ -27,6 +29,11 @@ namespace Bookings.Domain.Bookings
             if (!Pattern().IsMatch(emailAddress))
             {
                 throw new DomainException(BookingErrors.InvalidEmailAddress);
+            }
+
+            if (emailAddress.Length > MaxLength) 
+            {
+                throw new DomainException(BookingErrors.EmailAddressTooLong);
             }
 
             return new(emailAddress);

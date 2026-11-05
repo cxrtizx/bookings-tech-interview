@@ -5,7 +5,7 @@ namespace Bookings.Domain.Bookings
     public sealed record Customer
     {
         public const int NameMaxLength = 100;
-
+        
         public string Name { get; }
 
         public Email Email { get; }
