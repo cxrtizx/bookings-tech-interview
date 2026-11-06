@@ -10,28 +10,32 @@ namespace Bookings.Domain.Bookings
         public DateRange DateRange { get; private set; } = null!;
         public ResourceId ResourceId { get; private set; } = null!;
         public BookingStatus Status { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
 
         private Booking() { } // EF Core
         private Booking(
             Customer customer,
             DateRange dateRange,
-            ResourceId resourceId)
+            ResourceId resourceId,
+            DateTimeOffset now)
         {
             Customer = customer;
             DateRange = dateRange;
             ResourceId = resourceId;
             Status = BookingStatus.Pending;
+            CreatedAt = now;
             Id = BookingId.New();
         }
 
         public static Booking Create(Customer customer, DateRange dateRange, ResourceId resourceId, TimeProvider clock)
         {
-            if (dateRange.Start <= clock.GetUtcNow())
+            var now = clock.GetUtcNow();
+            if (dateRange.Start <= now)
             {
                 throw new DomainException(BookingErrors.StartInPast);
             }
 
-            var booking = new Booking(customer, dateRange, resourceId);
+            var booking = new Booking(customer, dateRange, resourceId, now);
             booking.Raise(new BookingCreated(booking.Id));
 
             return booking;
