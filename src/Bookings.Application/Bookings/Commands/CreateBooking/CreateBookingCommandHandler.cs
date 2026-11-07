@@ -14,6 +14,8 @@ namespace Bookings.Application.Bookings.Commands.CreateBooking
             var resourceId = ResourceId.Create(command.ResourceId);
             var customer = Customer.Create(command.CustomerName, command.CustomerEmail);
             var dateRange = DateRange.Create(command.Start, command.End);
+
+            // Finally
             var booking = Booking.Create(customer, dateRange, resourceId, clock);
 
             await bookingRepository.AddAsync(booking, cancellationToken);
