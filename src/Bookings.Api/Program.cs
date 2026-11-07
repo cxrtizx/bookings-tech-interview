@@ -1,4 +1,5 @@
 using Bookings.Api.Endpoints;
+using Bookings.Api.Errors;
 using Bookings.Application;
 using Bookings.Application.Behaviors;
 using Bookings.Infrastructure;
@@ -9,6 +10,8 @@ var connectionString = builder.Configuration.GetConnectionString("Bookings") ?? 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(connectionString);
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddMediator(
     options =>
@@ -26,7 +29,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -36,6 +40,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapBookingEndpoints();
+
 app.Run();
 
 

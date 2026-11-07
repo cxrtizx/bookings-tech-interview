@@ -5,8 +5,8 @@ using Mediator;
 namespace Bookings.Application.Behaviors
 {
     public sealed class ValidationBehavior<TMessage, TResponse>(
-        IEnumerable<IValidator<TMessage>> validators) :
-        IPipelineBehavior<TMessage, TResponse> where TMessage : IBaseCommand
+        IEnumerable<IValidator<TMessage>> validators)
+        : IPipelineBehavior<TMessage, TResponse> where TMessage : IBaseCommand
     {
         public async ValueTask<TResponse> Handle(
             TMessage message,

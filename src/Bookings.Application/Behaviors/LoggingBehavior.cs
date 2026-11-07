@@ -7,8 +7,8 @@ using System.Diagnostics;
 namespace Bookings.Application.Behaviors
 {
     public sealed class LoggingBehavior<TMessage, TResponse>(
-        ILogger<LoggingBehavior<TMessage, TResponse>> logger) :
-        IPipelineBehavior<TMessage, TResponse> where TMessage : IMessage
+        ILogger<LoggingBehavior<TMessage, TResponse>> logger)
+        : IPipelineBehavior<TMessage, TResponse> where TMessage : IMessage
     {
         public async ValueTask<TResponse> Handle(
             TMessage message, MessageHandlerDelegate<TMessage,
@@ -47,13 +47,9 @@ namespace Bookings.Application.Behaviors
 
                 throw;
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                logger.LogError(
-                    exception,
-                    "Unexpected exception while handling {MessageName}",
-                    messageName);
-
+                // Is logged at the GlobalExceptionHandler. It prevents dups.
                 throw;
             }
         }
