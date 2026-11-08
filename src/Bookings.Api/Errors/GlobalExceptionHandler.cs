@@ -27,6 +27,7 @@ namespace Bookings.Api.Errors
             {
                 ValidationException validationException => CreateValidationProblem(validationException),
                 DomainException domainException => CreateDomainProblem(domainException),
+                BadHttpRequestException badHttpRequestException => CreateBadHttpRequestException(),
                 _ => CreateUnexpectedProblem()
             };
 
@@ -82,6 +83,19 @@ namespace Bookings.Api.Errors
             };
 
             problemDetails.Extensions["code"] = domainException.Code;
+
+            return problemDetails;
+        }
+
+        private static ProblemDetails CreateBadHttpRequestException()
+        {
+            var problemDetails = new ProblemDetails()
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Bad request."
+            };
+
+            problemDetails.Extensions["code"] = "bad_request";
 
             return problemDetails;
         }
