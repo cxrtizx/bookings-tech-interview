@@ -10,6 +10,8 @@ namespace Bookings.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(BookingDbContext).Assembly);
+            // Allows PostgreSql to compare text with '=' (needed for ResourceId)
+            modelBuilder.HasPostgresExtension("btree_gist");
         }
     }
 }

@@ -6,6 +6,9 @@ namespace Bookings.Infrastructure.Persistence.Configurations
 {
     public sealed class BookingConfiguration : IEntityTypeConfiguration<Booking>
     {
+        private const int StatusMaxLength = 50;
+        public const string NoConfirmedOverlapConstraint = "EX_Bookings_NoConfirmedOverlap";
+
         public void Configure(EntityTypeBuilder<Booking> builder)
         {
             builder.ToTable("Bookings");
@@ -43,6 +46,7 @@ namespace Bookings.Infrastructure.Persistence.Configurations
                 .HasConversion(resourceId => resourceId.Value, value => ResourceId.Create(value));
 
             builder.Property(b => b.Status)
+                .HasMaxLength(StatusMaxLength)
                 .HasConversion<string>();
         }
     }
