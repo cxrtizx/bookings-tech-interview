@@ -1,4 +1,6 @@
 ﻿using Bookings.Application.Bookings.Commands.CreateBooking;
+using Bookings.Application.Bookings.Queries.GetBookings;
+using Bookings.Application.Common;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -10,6 +12,7 @@ namespace Bookings.Api.Endpoints
         {
             var group = endpointRouteBuilder.MapGroup("/api/bookings");
             group.MapPost("/", CreateBooking);
+            group.MapGet("/", GetBookings);
 
             return endpointRouteBuilder;
         }
@@ -26,6 +29,22 @@ namespace Bookings.Api.Endpoints
             var id = await sender.Send(command, cancellationToken);
 
             return TypedResults.Created($"/api/bookings/{id}", new CreateBookingResponse(id));
+        }
+
+        private static async Task<Ok<PagedResult<BookingSummaryDto>>> GetBookings(
+            ISender sender,
+            CancellationToken cancellationToken,
+            string? resourceId = null,
+            DateTimeOffset? from = null,
+            DateTimeOffset? to = null,
+            int page = Paging.DefaultPage,
+            int pageSize = Paging.DefaultPageSize,
+            string? sort = null)
+        {
+            var query = new GetBookingsQuery(resourceId, from, to, page, pageSize, sort);
+            var result = await sender.Send(query, cancellationToken);
+
+            return TypedResults.Ok(result);
         }
     }
 }

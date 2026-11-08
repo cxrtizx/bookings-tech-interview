@@ -1,5 +1,6 @@
 @Bookings.Api_HostAddress = http://localhost:5029
 
+### CA1 - Create booking -> 201 + Location
 POST {{Bookings.Api_HostAddress}}/api/bookings
 Content-Type: application/json
 Accept: application/json
@@ -14,5 +15,38 @@ Accept: application/json
   "resourceId":"room-A"
 }
 
+### F2 - List bookings with default sort and paging -> 200
+GET {{Bookings.Api_HostAddress}}/api/bookings
+Accept: application/json
 
-###
+### CA9 - Filter by resource and overlapping range -> 200, only intersecting bookings
+GET {{Bookings.Api_HostAddress}}/api/bookings?resourceId=room-A&from=2026-12-01T10:30:00Z&to=2026-12-01T12:00:00Z
+Accept: application/json
+
+### CA9 - Adjacent range [11:00, ...) does not intersect [10:00, 11:00) -> 200, empty
+GET {{Bookings.Api_HostAddress}}/api/bookings?resourceId=room-A&from=2026-12-01T11:00:00Z
+Accept: application/json
+
+### F2 - Offset in query string, '+' encoded as %2B (11:30+01:00 = 10:30Z) -> 200
+GET {{Bookings.Api_HostAddress}}/api/bookings?from=2026-12-01T11:30:00%2B01:00
+Accept: application/json
+
+### F2 - Sort by creation date descending, second page of one item -> 200
+GET {{Bookings.Api_HostAddress}}/api/bookings?sort=-createdAt&page=2&pageSize=1
+Accept: application/json
+
+### F2 - Page size above max -> 400 errors.PageSize
+GET {{Bookings.Api_HostAddress}}/api/bookings?pageSize=500
+Accept: application/json
+
+### F2 - Invalid sort -> 400 errors.Sort
+GET {{Bookings.Api_HostAddress}}/api/bookings?sort=foo
+Accept: application/json
+
+### F2 - From after To -> 400 errors.To
+GET {{Bookings.Api_HostAddress}}/api/bookings?from=2026-12-02T00:00:00Z&to=2026-12-01T00:00:00Z
+Accept: application/json
+
+### F2 - Unparseable page -> 400 code bad_request
+GET {{Bookings.Api_HostAddress}}/api/bookings?page=abc
+Accept: application/json
