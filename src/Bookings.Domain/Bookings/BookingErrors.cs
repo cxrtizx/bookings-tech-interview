@@ -25,6 +25,10 @@ namespace Bookings.Domain.Bookings
         public static readonly DomainError InvalidDateRange = new("booking.invalid_date_range", "The start time cannot be later than the end time.");
 
         public static readonly DomainError StartInPast = new("booking.start_in_past", "The event cannot occur in the past.");
+
+        public static readonly DomainError Overlap = new("booking.overlap", "The booking overlaps another booking for the same resource.");
+
+        public static readonly DomainError NotFound = new("booking.not_found", "Cannot find the booking.");
     }
 }
 

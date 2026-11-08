@@ -11,6 +11,7 @@ namespace Bookings.Domain.Bookings
         public ResourceId ResourceId { get; private set; } = null!;
         public BookingStatus Status { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; }
+        public DateTimeOffset? ConfirmedAt { get; private set; }
 
         private Booking() { } // EF Core
         private Booking(
@@ -39,6 +40,25 @@ namespace Bookings.Domain.Bookings
             booking.Raise(new BookingCreated(booking.Id));
 
             return booking;
+        }
+
+        public void Confirm(bool hasConfirmedOverlap, TimeProvider clock)
+        {
+            if (Status != BookingStatus.Pending)
+            {
+                throw new DomainException(BookingErrors.InvalidTransition);
+            }
+
+            if (hasConfirmedOverlap)
+            {
+                throw new DomainException(BookingErrors.Overlap);
+            }
+
+            var now = clock.GetUtcNow();
+            ConfirmedAt = now;
+            Status = BookingStatus.Confirmed;
+
+            Raise(new BookingConfirmed(Id, ResourceId, DateRange, Customer.Email, now));
         }
     }
 }
