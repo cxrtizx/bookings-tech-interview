@@ -12,6 +12,7 @@ namespace Bookings.Infrastructure
             services.AddDbContext<BookingDbContext>(options => options.UseNpgsql(connectionString));
 
             services.AddScoped<IBookingRepository, BookingRepository>();
+            services.AddScoped<IBookingQueries, BookingQueries>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
