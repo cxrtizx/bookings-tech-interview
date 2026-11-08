@@ -1,19 +1,18 @@
-﻿using Bookings.Domain.Bookings;
+﻿using Bookings.Application.Common;
+using Bookings.Domain.Bookings;
 using FluentValidation;
 
 namespace Bookings.Application.Bookings.Queries.GetBookings
 {
     public sealed class GetBookingsQueryValidator : AbstractValidator<GetBookingsQuery>
     {
-        public const int MaxPageSize = 100;
-
         public GetBookingsQueryValidator()
         {
             RuleFor(query => query.Page)
                 .GreaterThanOrEqualTo(1);
 
             RuleFor(query => query.PageSize)
-                .InclusiveBetween(1, MaxPageSize);
+                .InclusiveBetween(1, Paging.MaxPageSize);
 
             RuleFor(query => query.ResourceId)
                 .MaximumLength(ResourceId.MaxLength);
