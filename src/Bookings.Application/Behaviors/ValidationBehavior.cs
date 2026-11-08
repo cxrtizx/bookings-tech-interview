@@ -6,7 +6,7 @@ namespace Bookings.Application.Behaviors
 {
     public sealed class ValidationBehavior<TMessage, TResponse>(
         IEnumerable<IValidator<TMessage>> validators)
-        : IPipelineBehavior<TMessage, TResponse> where TMessage : IBaseCommand
+        : IPipelineBehavior<TMessage, TResponse> where TMessage : IMessage
     {
         public async ValueTask<TResponse> Handle(
             TMessage message,
