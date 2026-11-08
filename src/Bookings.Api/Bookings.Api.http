@@ -1,6 +1,18 @@
 @Bookings.Api_HostAddress = http://localhost:5029
 
-GET {{Bookings.Api_HostAddress}}/weatherforecast/
+POST {{Bookings.Api_HostAddress}}/api/bookings
+Content-Type: application/json
 Accept: application/json
+
+{
+  "customer":{
+    "name":"miguel",
+    "email":"mi@gu.el"
+  },
+  "start":"2026-12-01T10:00:00Z",
+  "end":"2026-12-01T11:00:00Z",
+  "resourceId":"room-A"
+}
+
 
 ###
