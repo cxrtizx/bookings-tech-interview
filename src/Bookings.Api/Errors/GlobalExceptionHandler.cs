@@ -15,7 +15,9 @@ namespace Bookings.Api.Errors
             new(
                 new Dictionary<string, int>
                 {
-                    [BookingErrors.InvalidTransition.Code] = StatusCodes.Status422UnprocessableEntity
+                    [BookingErrors.InvalidTransition.Code] = StatusCodes.Status422UnprocessableEntity,
+                    [BookingErrors.Overlap.Code] = StatusCodes.Status409Conflict,
+                    [BookingErrors.NotFound.Code] = StatusCodes.Status404NotFound,
                 });
 
         public async ValueTask<bool> TryHandleAsync(

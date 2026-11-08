@@ -50,3 +50,68 @@ Accept: application/json
 ### F2 - Unparseable page -> 400 code bad_request
 GET {{Bookings.Api_HostAddress}}/api/bookings?page=abc
 Accept: application/json
+
+# ---------------------------------------------------------------------------
+# F3 - Confirm. Run the requests below in order, top to bottom.
+# Booking A uses a random resource so the scenario can be re-run on a non-empty
+# database; B and C reuse A's resource through request variables.
+# ---------------------------------------------------------------------------
+
+### CA2 - Create booking A (10:00-11:00) in a fresh resource -> 201
+# @name createA
+POST {{Bookings.Api_HostAddress}}/api/bookings
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer": { "name": "Ana", "email": "ana@example.com" },
+  "start": "2027-01-15T10:00:00Z",
+  "end": "2027-01-15T11:00:00Z",
+  "resourceId": "room-{{$randomInt 100000 999999}}"
+}
+
+### CA2 - Confirm booking A, no overlap -> 200
+POST {{Bookings.Api_HostAddress}}/api/bookings/{{createA.response.body.$.id}}/confirm
+Accept: application/json
+
+### CA3 - Create booking B (10:30-11:30) overlapping A in the same resource -> 201
+# @name createB
+POST {{Bookings.Api_HostAddress}}/api/bookings
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer": { "name": "Bruno", "email": "bruno@example.com" },
+  "start": "2027-01-15T10:30:00Z",
+  "end": "2027-01-15T11:30:00Z",
+  "resourceId": "{{createA.request.body.$.resourceId}}"
+}
+
+### CA3 - Confirm B while A is confirmed -> 409 booking.overlap
+POST {{Bookings.Api_HostAddress}}/api/bookings/{{createB.response.body.$.id}}/confirm
+Accept: application/json
+
+### CA4 - Create booking C (11:00-12:00) adjacent to A in the same resource -> 201
+# @name createC
+POST {{Bookings.Api_HostAddress}}/api/bookings
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer": { "name": "Carla", "email": "carla@example.com" },
+  "start": "2027-01-15T11:00:00Z",
+  "end": "2027-01-15T12:00:00Z",
+  "resourceId": "{{createA.request.body.$.resourceId}}"
+}
+
+### CA4 - Confirm C, adjacent to A and overlapping only the pending B -> 200
+POST {{Bookings.Api_HostAddress}}/api/bookings/{{createC.response.body.$.id}}/confirm
+Accept: application/json
+
+### F3 - Confirm A again, already confirmed -> 422 booking.invalid_transition
+POST {{Bookings.Api_HostAddress}}/api/bookings/{{createA.response.body.$.id}}/confirm
+Accept: application/json
+
+### F3 - Confirm a booking that does not exist -> 404 booking.not_found
+POST {{Bookings.Api_HostAddress}}/api/bookings/00000000-0000-0000-0000-000000000001/confirm
+Accept: application/json

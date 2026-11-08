@@ -1,4 +1,5 @@
-﻿using Bookings.Application.Bookings.Commands.CreateBooking;
+﻿using Bookings.Application.Bookings.Commands.ConfirmBooking;
+using Bookings.Application.Bookings.Commands.CreateBooking;
 using Bookings.Application.Bookings.Queries.GetBookings;
 using Bookings.Application.Common;
 using Mediator;
@@ -13,11 +14,15 @@ namespace Bookings.Api.Endpoints
             var group = endpointRouteBuilder.MapGroup("/api/bookings");
             group.MapPost("/", CreateBooking);
             group.MapGet("/", GetBookings);
+            group.MapPost("/{id:guid}/confirm", ConfirmBooking);
 
             return endpointRouteBuilder;
         }
 
-        private static async Task<Created<CreateBookingResponse>> CreateBooking(CreateBookingRequest request, ISender sender, CancellationToken cancellationToken)
+        private static async Task<Created<CreateBookingResponse>> CreateBooking(
+            CreateBookingRequest request,
+            ISender sender,
+            CancellationToken cancellationToken)
         {
             var command = new CreateBookingCommand(
                 request.ResourceId,
@@ -45,6 +50,17 @@ namespace Bookings.Api.Endpoints
             var result = await sender.Send(query, cancellationToken);
 
             return TypedResults.Ok(result);
+        }
+
+        private static async Task<Ok> ConfirmBooking(
+            Guid id,
+            ISender sender,
+            CancellationToken cancellationToken)
+        {
+            var command = new ConfirmBookingCommand(id);
+            await sender.Send(command, cancellationToken);
+
+            return TypedResults.Ok();
         }
     }
 }
