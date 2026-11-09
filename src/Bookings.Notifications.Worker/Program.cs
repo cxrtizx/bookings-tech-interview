@@ -47,4 +47,12 @@ builder.Services.AddMassTransit(bus =>
 });
 
 var host = builder.Build();
+
+// docker-compose sets Database:MigrateOnStartup=true so a clean machine starts with one command (CA12).
+if (host.Services.GetRequiredService<IConfiguration>().GetValue<bool>("Database:MigrateOnStartup"))
+{
+    await using var scope = host.Services.CreateAsyncScope();
+    await scope.ServiceProvider.GetRequiredService<NotificationsDbContext>().Database.MigrateAsync();
+}
+
 host.Run();

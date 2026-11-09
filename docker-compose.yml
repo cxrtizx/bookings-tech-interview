@@ -31,5 +31,55 @@ services:
             retries: 5
             start_period: 20s
 
+    bookings-api:
+        build:
+            context: .
+            dockerfile: src/Bookings.Api/Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - Database__MigrateOnStartup=true
+            - ConnectionStrings__Bookings=Host=bookings-db;Port=5432;Database=bookings;Username=bookings;Password=bookings
+            - RabbitMq__Host=bookings-broker
+            - RabbitMq__Username=bookings
+            - RabbitMq__Password=bookings
+            - Cors__AllowedOrigins__0=http://localhost:8080
+        ports:
+            - "5029:8080"
+        depends_on:
+            bookings-db:
+                condition: service_healthy
+            bookings-broker:
+                condition: service_healthy
+        restart: unless-stopped
+
+    bookings-worker:
+        build:
+            context: .
+            dockerfile: src/Bookings.Notifications.Worker/Dockerfile
+        environment:
+            - DOTNET_ENVIRONMENT=Development
+            - Database__MigrateOnStartup=true
+            - ConnectionStrings__Notifications=Host=bookings-db;Port=5432;Database=bookings;Username=bookings;Password=bookings
+            - RabbitMq__Host=bookings-broker
+            - RabbitMq__Username=bookings
+            - RabbitMq__Password=bookings
+        depends_on:
+            bookings-db:
+                condition: service_healthy
+            bookings-broker:
+                condition: service_healthy
+        restart: unless-stopped
+
+    bookings-web:
+        build:
+            context: web
+            args:
+                # URL the browser uses to reach the API (published host port of bookings-api).
+                VITE_API_BASE_URL: http://localhost:5029
+        ports:
+            - "8080:80"
+        depends_on:
+            - bookings-api
+
 volumes:
     bookings-db-data:

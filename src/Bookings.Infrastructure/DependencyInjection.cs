@@ -52,5 +52,13 @@ namespace Bookings.Infrastructure
 
             return services;
         }
+
+        // Applies pending EF Core migrations. Meant for local/docker-compose runs (single instance);
+        // in production migrations run as a separate deployment step (idempotent script or bundle).
+        public static async Task MigrateBookingsDatabaseAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
+        {
+            await using var scope = services.CreateAsyncScope();
+            await scope.ServiceProvider.GetRequiredService<BookingDbContext>().Database.MigrateAsync(cancellationToken);
+        }
     }
 }

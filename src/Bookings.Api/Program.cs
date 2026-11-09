@@ -49,6 +49,12 @@ builder.Logging.AddSimpleConsole(options => options.IncludeScopes = true);
 
 var app = builder.Build();
 
+// docker-compose sets Database:MigrateOnStartup=true so a clean machine starts with one command (CA12).
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    await app.Services.MigrateBookingsDatabaseAsync();
+}
+
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler();
 
