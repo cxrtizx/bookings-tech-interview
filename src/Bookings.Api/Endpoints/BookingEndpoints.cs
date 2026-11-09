@@ -1,4 +1,5 @@
-﻿using Bookings.Application.Bookings.Commands.ConfirmBooking;
+﻿using Bookings.Application.Bookings.Commands.CancelBooking;
+using Bookings.Application.Bookings.Commands.ConfirmBooking;
 using Bookings.Application.Bookings.Commands.CreateBooking;
 using Bookings.Application.Bookings.Queries.GetBookings;
 using Bookings.Application.Common;
@@ -15,6 +16,7 @@ namespace Bookings.Api.Endpoints
             group.MapPost("/", CreateBooking);
             group.MapGet("/", GetBookings);
             group.MapPost("/{id:guid}/confirm", ConfirmBooking);
+            group.MapPost("/{id:guid}/cancel", CancelBooking);
 
             return endpointRouteBuilder;
         }
@@ -58,6 +60,18 @@ namespace Bookings.Api.Endpoints
             CancellationToken cancellationToken)
         {
             var command = new ConfirmBookingCommand(id);
+            await sender.Send(command, cancellationToken);
+
+            return TypedResults.Ok();
+        }
+
+        private static async Task<Ok> CancelBooking(
+            Guid id,
+            CancelBookingRequest? request,
+            ISender sender,
+            CancellationToken cancellationToken)
+        {
+            var command = new CancelBookingCommand(id, request?.Reason);
             await sender.Send(command, cancellationToken);
 
             return TypedResults.Ok();

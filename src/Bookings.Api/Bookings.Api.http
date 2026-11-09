@@ -115,3 +115,85 @@ Accept: application/json
 ### F3 - Confirm a booking that does not exist -> 404 booking.not_found
 POST {{Bookings.Api_HostAddress}}/api/bookings/00000000-0000-0000-0000-000000000001/confirm
 Accept: application/json
+
+# ---------------------------------------------------------------------------
+# F4 - Cancel. Run the requests below in order, top to bottom.
+# Uses its own random resource, independent from the F3 scenario.
+# ---------------------------------------------------------------------------
+
+### F4 - Create booking D (09:00-10:00) in a fresh resource -> 201
+# @name createD
+POST {{Bookings.Api_HostAddress}}/api/bookings
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer": { "name": "Diego", "email": "diego@example.com" },
+  "start": "2027-02-10T09:00:00Z",
+  "end": "2027-02-10T10:00:00Z",
+  "resourceId": "room-{{$randomInt 100000 999999}}"
+}
+
+### F4 - Cancel pending booking D with a reason -> 200
+POST {{Bookings.Api_HostAddress}}/api/bookings/{{createD.response.body.$.id}}/cancel
+Content-Type: application/json
+Accept: application/json
+
+{
+  "reason": "Customer called to cancel"
+}
+
+### CA5 - Cancel booking D again, already cancelled -> 422 booking.invalid_transition
+POST {{Bookings.Api_HostAddress}}/api/bookings/{{createD.response.body.$.id}}/cancel
+Accept: application/json
+
+### F4 - Create booking E (09:00-10:00) in the same resource -> 201
+# @name createE
+POST {{Bookings.Api_HostAddress}}/api/bookings
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer": { "name": "Elena", "email": "elena@example.com" },
+  "start": "2027-02-10T09:00:00Z",
+  "end": "2027-02-10T10:00:00Z",
+  "resourceId": "{{createD.request.body.$.resourceId}}"
+}
+
+### F4 - Confirm booking E -> 200
+POST {{Bookings.Api_HostAddress}}/api/bookings/{{createE.response.body.$.id}}/confirm
+Accept: application/json
+
+### F4 - Cancel confirmed booking E without body (reason is optional) -> 200
+POST {{Bookings.Api_HostAddress}}/api/bookings/{{createE.response.body.$.id}}/cancel
+Accept: application/json
+
+### F4 - Create booking F in the slot freed by E -> 201
+# @name createF
+POST {{Bookings.Api_HostAddress}}/api/bookings
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer": { "name": "Fran", "email": "fran@example.com" },
+  "start": "2027-02-10T09:00:00Z",
+  "end": "2027-02-10T10:00:00Z",
+  "resourceId": "{{createD.request.body.$.resourceId}}"
+}
+
+### F4 - Confirm F, cancelling E released the slot -> 200
+POST {{Bookings.Api_HostAddress}}/api/bookings/{{createF.response.body.$.id}}/confirm
+Accept: application/json
+
+### F4 - Cancel with a reason longer than 100 characters -> 400 errors.Reason
+POST {{Bookings.Api_HostAddress}}/api/bookings/{{createF.response.body.$.id}}/cancel
+Content-Type: application/json
+Accept: application/json
+
+{
+  "reason": "This reason is intentionally far too long for the limit, so it must be rejected before reaching the domain."
+}
+
+### F4 - Cancel a booking that does not exist -> 404 booking.not_found
+POST {{Bookings.Api_HostAddress}}/api/bookings/00000000-0000-0000-0000-000000000001/cancel
+Accept: application/json
