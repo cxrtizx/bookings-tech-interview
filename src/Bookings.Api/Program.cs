@@ -77,3 +77,6 @@ app.MapHealthChecks("/health", new HealthCheckOptions
 });
 
 app.Run();
+
+// Exposes the implicit Program class so integration tests can use WebApplicationFactory<Program>.
+public partial class Program;
