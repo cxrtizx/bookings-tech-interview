@@ -6,10 +6,10 @@ using Mediator;
 
 namespace Bookings.Application.Bookings.Queries.GetBookings
 {
-    public sealed class GetBookingsQueryHandler(
-        IBookingQueries bookingQueries) : IQueryHandler<GetBookingsQuery, PagedResult<BookingSummaryDto>>
+    public sealed class GetBookingsQueryHandler(IBookingQueries bookingQueries)
+        : IQueryHandler<GetBookingsQuery, PagedResult<BookingDto>>
     {
-        public async ValueTask<PagedResult<BookingSummaryDto>> Handle(
+        public async ValueTask<PagedResult<BookingDto>> Handle(
             GetBookingsQuery query,
             CancellationToken cancellationToken)
         {

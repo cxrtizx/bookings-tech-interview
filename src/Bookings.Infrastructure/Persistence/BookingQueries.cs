@@ -1,15 +1,31 @@
-﻿using Bookings.Application.Bookings.Queries.GetBookings;
+﻿using Bookings.Application.Bookings.Queries;
+using Bookings.Application.Bookings.Queries.GetBookings;
 using Bookings.Application.Common;
 using Bookings.Application.Ports;
 using Bookings.Domain.Abstractions;
 using Bookings.Domain.Bookings;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Bookings.Infrastructure.Persistence
 {
     public sealed class BookingQueries(BookingDbContext dbContext) : IBookingQueries
     {
-        public async Task<PagedResult<BookingSummaryDto>> SearchAsync(
+        private static readonly Expression<Func<Booking, BookingDto>> ToDto =
+            booking => new BookingDto(
+                booking.Id.Value,
+                booking.Customer.Name,
+                booking.Customer.Email.Value,
+                booking.DateRange.Start,
+                booking.DateRange.End,
+                booking.CreatedAt,
+                booking.ConfirmedAt,
+                booking.CancelledAt,
+                booking.CancellationReason,
+                booking.ResourceId.Value,
+                booking.Status.ToString());
+
+        public async Task<PagedResult<BookingDto>> SearchAsync(
             Specification<Booking> specification,
             BookingSort sort,
             int page,
@@ -25,18 +41,19 @@ namespace Bookings.Infrastructure.Persistence
             var items = await ApplySort(query, sort)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(booking => new BookingSummaryDto(
-                    booking.Id.Value,
-                    booking.Customer.Name,
-                    booking.Customer.Email.Value,
-                    booking.DateRange.Start,
-                    booking.DateRange.End,
-                    booking.CreatedAt,
-                    booking.ResourceId.Value,
-                    booking.Status.ToString()))
+                .Select(ToDto)
                 .ToListAsync(cancellationToken);
 
-            return new PagedResult<BookingSummaryDto>(items, page, pageSize, totalCount);
+            return new PagedResult<BookingDto>(items, page, pageSize, totalCount);
+        }
+
+        public async Task<BookingDto?> GetByIdAsync(BookingId bookingId, CancellationToken cancellationToken)
+        {
+            return await dbContext.Bookings
+                .AsNoTracking()
+                .Where(booking => booking.Id == bookingId)
+                .Select(ToDto)
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         private static IQueryable<Booking> ApplySort(

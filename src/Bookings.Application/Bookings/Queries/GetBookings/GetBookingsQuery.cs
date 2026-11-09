@@ -9,5 +9,5 @@ namespace Bookings.Application.Bookings.Queries.GetBookings
         DateTimeOffset? To,
         int Page = Paging.DefaultPage,
         int PageSize = Paging.DefaultPageSize,
-        string? Sort = null) : IQuery<PagedResult<BookingSummaryDto>>;
+        string? Sort = null) : IQuery<PagedResult<BookingDto>>;
 }
