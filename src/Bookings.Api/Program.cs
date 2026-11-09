@@ -1,17 +1,21 @@
+using Bookings.Api.Correlation;
 using Bookings.Api.Endpoints;
 using Bookings.Api.Errors;
 using Bookings.Application;
 using Bookings.Application.Behaviors;
+using Bookings.Application.Ports;
 using Bookings.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("Bookings") ?? throw new InvalidOperationException("Cannot find \"Bookings\" connection string");
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(connectionString);
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.Services.AddScoped<CorrelationContext>();
+builder.Services.AddScoped<ICorrelationContext>(sp => sp.GetRequiredService<CorrelationContext>());
 
 builder.Services.AddMediator(
     options =>
@@ -29,6 +33,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
