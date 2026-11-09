@@ -5,6 +5,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Bookings.Infrastructure
 {
@@ -15,6 +16,12 @@ namespace Bookings.Infrastructure
             services.AddDbContext<BookingDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("Bookings")
                 ?? throw new InvalidOperationException("Couldn't find the connection string")));
+
+            // RabbitMQ down is Degraded, not Unhealthy: thanks to the outbox the API keeps accepting
+            // confirmations and delivers the events once the broker is back (CA10).
+            services.AddHealthChecks()
+                .AddDbContextCheck<BookingDbContext>("postgres")
+                .AddCheck<RabbitMqHealthCheck>("rabbitmq", failureStatus: HealthStatus.Degraded);
 
             services.AddScoped<IBookingRepository, BookingRepository>();
             services.AddScoped<IBookingQueries, BookingQueries>();
