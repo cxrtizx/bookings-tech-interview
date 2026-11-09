@@ -31,6 +31,8 @@ builder.Services.AddMediator(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Logging.AddSimpleConsole(options => options.IncludeScopes = true);
+
 var app = builder.Build();
 
 app.UseMiddleware<CorrelationIdMiddleware>();
