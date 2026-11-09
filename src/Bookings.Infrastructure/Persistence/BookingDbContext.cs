@@ -1,4 +1,5 @@
 ﻿using Bookings.Domain.Bookings;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bookings.Infrastructure.Persistence
@@ -12,6 +13,10 @@ namespace Bookings.Infrastructure.Persistence
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(BookingDbContext).Assembly);
             // Allows PostgreSql to compare text with '=' (needed for ResourceId)
             modelBuilder.HasPostgresExtension("btree_gist");
+            // MassTransit
+            modelBuilder.AddInboxStateEntity();
+            modelBuilder.AddOutboxMessageEntity();
+            modelBuilder.AddOutboxStateEntity();
         }
     }
 }
