@@ -3,6 +3,7 @@ using Bookings.Application.Common;
 using Bookings.Domain.Bookings.Events;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 
 namespace Bookings.Application
 {
@@ -10,6 +11,9 @@ namespace Bookings.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            // Validation messages in English regardless of the server's OS culture (the API contract is in English).
+            ValidatorOptions.Global.LanguageManager.Culture = CultureInfo.InvariantCulture;
+
             // Looks for every class inheriting from AbstractValidator in this assembly
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
             services.AddScoped<IDomainEventHandler<BookingConfirmed>, BookingConfirmedDomainEventHandler>();

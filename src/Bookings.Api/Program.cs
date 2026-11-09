@@ -14,7 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddProblemDetails();
+// Every ProblemDetails carries the request's correlation id, so a user-facing error can be traced in the logs.
+builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
+    context.ProblemDetails.Extensions["correlationId"] =
+        context.HttpContext.RequestServices.GetService<ICorrelationContext>()?.CorrelationId);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddScoped<CorrelationContext>();

@@ -4,6 +4,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.ObjectModel;
+using System.Text.Json;
 
 namespace Bookings.Api.Errors
 {
@@ -56,7 +57,8 @@ namespace Bookings.Api.Errors
         private static HttpValidationProblemDetails CreateValidationProblem(ValidationException validationException)
         {
             var errors = validationException.Errors
-                .GroupBy(error => error.PropertyName)
+                // camelCase keys match the JSON field names, so the SPA can show each error next to its input.
+                .GroupBy(error => JsonNamingPolicy.CamelCase.ConvertName(error.PropertyName))
                 .ToDictionary(
                     group => group.Key,
                     group => group.Select(error => error.ErrorMessage).ToArray());
