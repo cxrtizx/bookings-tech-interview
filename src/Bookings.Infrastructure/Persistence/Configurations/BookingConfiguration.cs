@@ -48,6 +48,9 @@ namespace Bookings.Infrastructure.Persistence.Configurations
             builder.Property(b => b.Status)
                 .HasMaxLength(StatusMaxLength)
                 .HasConversion<string>();
+
+            builder.Property(b => b.CancellationReason)
+                .HasMaxLength(Booking.CancellationReasonMaxLength);
         }
     }
 }
