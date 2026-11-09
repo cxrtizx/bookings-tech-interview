@@ -7,10 +7,20 @@ using Npgsql;
 
 namespace Bookings.Infrastructure.Persistence
 {
-    public sealed class UnitOfWork(BookingDbContext dbContext) : IUnitOfWork
+    public sealed class UnitOfWork(BookingDbContext dbContext, DomainEventDispatcher dispatcher) : IUnitOfWork
     {
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         {
+            var aggregates = dbContext.ChangeTracker.Entries<AggregateRoot>()
+                .Select(entry => entry.Entity)
+                .Where(aggregate => aggregate.DomainEvents.Count > 0)
+                .ToList();
+
+            var domainEvents = aggregates.SelectMany(aggregate => aggregate.DomainEvents).ToList();
+            aggregates.ForEach(aggregate => aggregate.ClearDomainEvents());
+
+            await dispatcher.DispatchAsync(domainEvents, cancellationToken);
+
             try
             {
                 return await dbContext.SaveChangesAsync(cancellationToken);

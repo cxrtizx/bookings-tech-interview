@@ -14,6 +14,7 @@ namespace Bookings.Infrastructure
             services.AddScoped<IBookingRepository, BookingRepository>();
             services.AddScoped<IBookingQueries, BookingQueries>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<DomainEventDispatcher>();
 
             return services;
         }
