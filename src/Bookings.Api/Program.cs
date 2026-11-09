@@ -5,6 +5,7 @@ using Bookings.Application;
 using Bookings.Application.Behaviors;
 using Bookings.Application.Ports;
 using Bookings.Infrastructure;
+using Bookings.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 const string FrontendCorsPolicy = "Frontend";
@@ -53,6 +54,12 @@ var app = builder.Build();
 if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 {
     await app.Services.MigrateBookingsDatabaseAsync();
+}
+
+// Demo data only when the database is empty (docker-compose enables it).
+if (app.Configuration.GetValue<bool>("Database:SeedDemoData"))
+{
+    await app.Services.SeedDemoDataAsync();
 }
 
 app.UseMiddleware<CorrelationIdMiddleware>();

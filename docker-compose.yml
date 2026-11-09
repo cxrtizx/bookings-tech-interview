@@ -38,6 +38,7 @@ services:
         environment:
             - ASPNETCORE_ENVIRONMENT=Development
             - Database__MigrateOnStartup=true
+            - Database__SeedDemoData=true
             - ConnectionStrings__Bookings=Host=bookings-db;Port=5432;Database=bookings;Username=bookings;Password=bookings
             - RabbitMq__Host=bookings-broker
             - RabbitMq__Username=bookings
