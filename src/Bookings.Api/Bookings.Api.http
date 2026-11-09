@@ -197,3 +197,40 @@ Accept: application/json
 ### F4 - Cancel a booking that does not exist -> 404 booking.not_found
 POST {{Bookings.Api_HostAddress}}/api/bookings/00000000-0000-0000-0000-000000000001/cancel
 Accept: application/json
+
+# ---------------------------------------------------------------------------
+# F5 - Booking details. Run the requests below in order, top to bottom.
+# ---------------------------------------------------------------------------
+
+### F5 - Create booking G with a +02:00 offset -> 201 + Location
+# @name createG
+POST {{Bookings.Api_HostAddress}}/api/bookings
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer": { "name": "Gloria", "email": "gloria@example.com" },
+  "start": "2027-04-01T09:00:00+02:00",
+  "end": "2027-04-01T10:00:00+02:00",
+  "resourceId": "room-{{$randomInt 100000 999999}}"
+}
+
+### F5 - Follow the Location header of the 201 -> 200, start persisted in UTC (07:00Z)
+GET {{Bookings.Api_HostAddress}}{{createG.response.headers.Location}}
+Accept: application/json
+
+### F5 - Confirm booking G -> 200
+POST {{Bookings.Api_HostAddress}}/api/bookings/{{createG.response.body.$.id}}/confirm
+Accept: application/json
+
+### F5 - Get booking G after confirming -> 200, status Confirmed and confirmedAt set
+GET {{Bookings.Api_HostAddress}}/api/bookings/{{createG.response.body.$.id}}
+Accept: application/json
+
+### F5 - Get a booking that does not exist -> 404 booking.not_found
+GET {{Bookings.Api_HostAddress}}/api/bookings/00000000-0000-0000-0000-000000000001
+Accept: application/json
+
+### F5 - Get with an id that is not a GUID -> 404, the :guid route constraint does not match
+GET {{Bookings.Api_HostAddress}}/api/bookings/abc
+Accept: application/json
