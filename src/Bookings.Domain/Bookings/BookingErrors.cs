@@ -29,6 +29,8 @@ namespace Bookings.Domain.Bookings
         public static readonly DomainError Overlap = new("booking.overlap", "The booking overlaps another booking for the same resource.");
 
         public static readonly DomainError NotFound = new("booking.not_found", "Cannot find the booking.");
+
+        public static readonly DomainError CancellationReasonTooLong = new("booking.cancellation_reason_too_long", "Cancellation reason is too long.");
     }
 }
 
